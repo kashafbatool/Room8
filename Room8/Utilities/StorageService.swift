@@ -9,6 +9,11 @@ class StorageService {
     private let completionKey = "room8_completions"
     private let whiteboardNotesKey = "room8_whiteboard_notes"
     private let whiteboardDrawingKey = "room8_whiteboard_drawing"
+    private let emergencyContactsKey = "room8_emergency_contacts"
+    private let campusSafetyKey = "room8_campus_safety_number"
+    private let notificationsEnabledKey = "room8_notifications_enabled"
+    private let calendarItemsKey = "room8_calendar_items"
+    private let quietHoursKey = "room8_quiet_hours"
     private let defaults = UserDefaults.standard
     
     // MARK: - Chore Storage
@@ -82,6 +87,73 @@ class StorageService {
     func loadWhiteboardDrawingData() -> Data {
         defaults.data(forKey: whiteboardDrawingKey) ?? Data()
     }
+
+    // MARK: - Emergency Contacts Storage
+
+    func saveEmergencyContacts(_ contacts: [EmergencyContact]) {
+        if let encoded = try? JSONEncoder().encode(contacts) {
+            defaults.set(encoded, forKey: emergencyContactsKey)
+        }
+    }
+
+    func loadEmergencyContacts() -> [EmergencyContact] {
+        guard let data = defaults.data(forKey: emergencyContactsKey),
+              let contacts = try? JSONDecoder().decode([EmergencyContact].self, from: data) else {
+            return []
+        }
+        return contacts
+    }
+
+    func saveCampusSafetyNumber(_ number: String) {
+        defaults.set(number, forKey: campusSafetyKey)
+    }
+
+    func loadCampusSafetyNumber() -> String {
+        defaults.string(forKey: campusSafetyKey) ?? ""
+    }
+
+    func saveNotificationsEnabled(_ enabled: Bool) {
+        defaults.set(enabled, forKey: notificationsEnabledKey)
+    }
+
+    func loadNotificationsEnabled() -> Bool {
+        if defaults.object(forKey: notificationsEnabledKey) == nil {
+            return true
+        }
+        return defaults.bool(forKey: notificationsEnabledKey)
+    }
+
+    // MARK: - Calendar Items Storage
+
+    func saveCalendarItems(_ items: [CalendarItem]) {
+        if let encoded = try? JSONEncoder().encode(items) {
+            defaults.set(encoded, forKey: calendarItemsKey)
+        }
+    }
+
+    func loadCalendarItems() -> [CalendarItem] {
+        guard let data = defaults.data(forKey: calendarItemsKey),
+              let items = try? JSONDecoder().decode([CalendarItem].self, from: data) else {
+            return []
+        }
+        return items
+    }
+
+    // MARK: - Quiet Hours Storage
+
+    func saveQuietHours(_ schedules: [QuietHoursSchedule]) {
+        if let encoded = try? JSONEncoder().encode(schedules) {
+            defaults.set(encoded, forKey: quietHoursKey)
+        }
+    }
+
+    func loadQuietHours() -> [QuietHoursSchedule] {
+        guard let data = defaults.data(forKey: quietHoursKey),
+              let schedules = try? JSONDecoder().decode([QuietHoursSchedule].self, from: data) else {
+            return []
+        }
+        return schedules
+    }
     
     // MARK: - Clear All Data
     
@@ -91,5 +163,10 @@ class StorageService {
         defaults.removeObject(forKey: completionKey)
         defaults.removeObject(forKey: whiteboardNotesKey)
         defaults.removeObject(forKey: whiteboardDrawingKey)
+        defaults.removeObject(forKey: emergencyContactsKey)
+        defaults.removeObject(forKey: campusSafetyKey)
+        defaults.removeObject(forKey: notificationsEnabledKey)
+        defaults.removeObject(forKey: calendarItemsKey)
+        defaults.removeObject(forKey: quietHoursKey)
     }
 }
