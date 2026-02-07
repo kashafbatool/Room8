@@ -4,6 +4,7 @@ import Foundation
 @MainActor
 class CalendarViewModel: ObservableObject {
     @Published var items: [CalendarItem] = []
+    @Published var quietHours: [QuietHoursSchedule] = []
 
     private let storageService = StorageService.shared
 
@@ -37,7 +38,7 @@ class CalendarViewModel: ObservableObject {
         )
 
         items.append(item)
-        save()
+        saveItems()
     }
 
     func deleteItems(at offsets: IndexSet) {
@@ -46,14 +47,43 @@ class CalendarViewModel: ObservableObject {
             let id = sorted[index].id
             items.removeAll { $0.id == id }
         }
-        save()
+        saveItems()
+    }
+
+    func addQuietHours(
+        type: QuietHoursSchedule.ScheduleType,
+        startTime: Date,
+        endTime: Date,
+        daysOfWeek: [Int],
+        notes: String?
+    ) {
+        let trimmedNotes = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let schedule = QuietHoursSchedule(
+            type: type,
+            startTime: startTime,
+            endTime: endTime,
+            daysOfWeek: daysOfWeek,
+            notes: trimmedNotes?.isEmpty == true ? nil : trimmedNotes
+        )
+        quietHours.append(schedule)
+        saveQuietHours()
+    }
+
+    func deleteQuietHours(at offsets: IndexSet) {
+        quietHours.remove(atOffsets: offsets)
+        saveQuietHours()
     }
 
     private func load() {
         items = storageService.loadCalendarItems()
+        quietHours = storageService.loadQuietHours()
     }
 
-    private func save() {
+    private func saveItems() {
         storageService.saveCalendarItems(items)
+    }
+
+    private func saveQuietHours() {
+        storageService.saveQuietHours(quietHours)
     }
 }

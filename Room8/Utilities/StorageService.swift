@@ -13,6 +13,7 @@ class StorageService {
     private let campusSafetyKey = "room8_campus_safety_number"
     private let notificationsEnabledKey = "room8_notifications_enabled"
     private let calendarItemsKey = "room8_calendar_items"
+    private let quietHoursKey = "room8_quiet_hours"
     private let defaults = UserDefaults.standard
     
     // MARK: - Chore Storage
@@ -137,6 +138,22 @@ class StorageService {
         }
         return items
     }
+
+    // MARK: - Quiet Hours Storage
+
+    func saveQuietHours(_ schedules: [QuietHoursSchedule]) {
+        if let encoded = try? JSONEncoder().encode(schedules) {
+            defaults.set(encoded, forKey: quietHoursKey)
+        }
+    }
+
+    func loadQuietHours() -> [QuietHoursSchedule] {
+        guard let data = defaults.data(forKey: quietHoursKey),
+              let schedules = try? JSONDecoder().decode([QuietHoursSchedule].self, from: data) else {
+            return []
+        }
+        return schedules
+    }
     
     // MARK: - Clear All Data
     
@@ -150,5 +167,6 @@ class StorageService {
         defaults.removeObject(forKey: campusSafetyKey)
         defaults.removeObject(forKey: notificationsEnabledKey)
         defaults.removeObject(forKey: calendarItemsKey)
+        defaults.removeObject(forKey: quietHoursKey)
     }
 }

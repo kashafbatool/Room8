@@ -4,6 +4,7 @@ import SwiftUI
 struct CalendarView: View {
     @StateObject private var viewModel = CalendarViewModel()
     @State private var showingAddItem = false
+    @State private var showingAddQuietHours = false
     @State private var displayMode: DisplayMode = .calendar
     @State private var currentMonth = Date()
     @State private var selectedDate = Date()
@@ -40,11 +41,15 @@ struct CalendarView: View {
             .sheet(isPresented: $showingAddItem) {
                 AddCalendarItemView(viewModel: viewModel, isPresented: $showingAddItem)
             }
+            .sheet(isPresented: $showingAddQuietHours) {
+                AddQuietHoursView(viewModel: viewModel, isPresented: $showingAddQuietHours)
+            }
         }
     }
 
     private var listView: some View {
         List {
+            quietHoursSection
             if viewModel.sortedItems.isEmpty {
                 emptyState
             } else {
@@ -63,6 +68,7 @@ struct CalendarView: View {
                 weekHeader
                 monthGrid
                 selectedDaySection
+                quietHoursSectionCompact
             }
             .padding(.horizontal)
             .padding(.bottom, 16)
@@ -137,6 +143,50 @@ struct CalendarView: View {
             } else {
                 ForEach(items) { item in
                     CalendarItemRow(item: item)
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    private var quietHoursSection: some View {
+        Section(header: Text("Quiet Hours & Sleep")) {
+            if viewModel.quietHours.isEmpty {
+                Text("No quiet hours set")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(viewModel.quietHours) { schedule in
+                    QuietHoursRow(schedule: schedule)
+                }
+                .onDelete(perform: viewModel.deleteQuietHours)
+            }
+
+            Button("Add Quiet Hours") {
+                showingAddQuietHours = true
+            }
+        }
+    }
+
+    private var quietHoursSectionCompact: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Quiet Hours & Sleep")
+                    .font(.headline)
+                Spacer()
+                Button("Add") {
+                    showingAddQuietHours = true
+                }
+                .font(.caption)
+            }
+
+            if viewModel.quietHours.isEmpty {
+                Text("No quiet hours set")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                ForEach(viewModel.quietHours) { schedule in
+                    QuietHoursRow(schedule: schedule)
                 }
             }
         }
@@ -294,6 +344,49 @@ private enum DisplayMode: String, CaseIterable {
     case list = "List"
 }
 
+// MARK: - Quiet Hours Row
+private struct QuietHoursRow: View {
+    let schedule: QuietHoursSchedule
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(schedule.type.rawValue)
+                    .font(.headline)
+                Spacer()
+                Text(timeRangeText)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Text(daysText)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            if let notes = schedule.notes, !notes.isEmpty {
+                Text(notes)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 6)
+    }
+
+    private var timeRangeText: String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return "\(formatter.string(from: schedule.startTime)) - \(formatter.string(from: schedule.endTime))"
+    }
+
+    private var daysText: String {
+        let symbols = Calendar.current.shortWeekdaySymbols
+        let labels = schedule.daysOfWeek.compactMap { index -> String? in
+            let i = index - 1
+            guard i >= 0 && i < symbols.count else { return nil }
+            return symbols[i]
+        }
+        return labels.isEmpty ? "No days selected" : labels.joined(separator: ", ")
+    }
+}
+
 // MARK: - Add Calendar Item View
 private struct AddCalendarItemView: View {
     @ObservedObject var viewModel: CalendarViewModel
@@ -358,6 +451,96 @@ private struct AddCalendarItemView: View {
         let trimmed = amountText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, let value = Double(trimmed) else { return nil }
         return value
+    }
+}
+
+// MARK: - Add Quiet Hours View
+private struct AddQuietHoursView: View {
+    @ObservedObject var viewModel: CalendarViewModel
+    @Binding var isPresented: Bool
+
+    @State private var type: QuietHoursSchedule.ScheduleType = .quiet
+    @State private var startTime = Date()
+    @State private var endTime = Date()
+    @State private var selectedDays: Set<Int> = []
+    @State private var notes = ""
+
+    private let calendar = Calendar.current
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Type")) {
+                    Picker("Schedule", selection: $type) {
+                        ForEach(QuietHoursSchedule.ScheduleType.allCases, id: \.self) { scheduleType in
+                            Text(scheduleType.rawValue).tag(scheduleType)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section(header: Text("Time")) {
+                    DatePicker("Start", selection: $startTime, displayedComponents: .hourAndMinute)
+                    DatePicker("End", selection: $endTime, displayedComponents: .hourAndMinute)
+                }
+
+                Section(header: Text("Days")) {
+                    let symbols = calendar.shortWeekdaySymbols
+                    ForEach(symbols.indices, id: \.self) { index in
+                        let weekday = index + 1
+                        Button {
+                            toggleDay(weekday)
+                        } label: {
+                            HStack {
+                                Text(symbols[index])
+                                Spacer()
+                                if selectedDays.contains(weekday) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.blue)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section(header: Text("Notes")) {
+                    TextField("Optional notes", text: $notes, axis: .vertical)
+                        .lineLimit(3, reservesSpace: true)
+                }
+            }
+            .navigationTitle("Quiet Hours")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        isPresented = false
+                    }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        viewModel.addQuietHours(
+                            type: type,
+                            startTime: startTime,
+                            endTime: endTime,
+                            daysOfWeek: selectedDays.sorted(),
+                            notes: notes
+                        )
+                        isPresented = false
+                    }
+                    .disabled(selectedDays.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func toggleDay(_ weekday: Int) {
+        if selectedDays.contains(weekday) {
+            selectedDays.remove(weekday)
+        } else {
+            selectedDays.insert(weekday)
+        }
     }
 }
 
