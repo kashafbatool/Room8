@@ -24,7 +24,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E4292C882F37EBE50078D96B /* room8.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = room8.xcodeproj; sourceTree = "<group>"; };
 		E4D564A62F37B05F00DBA659 /* room8.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = room8.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4D564B42F37B06200DBA659 /* room8Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = room8Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4D564BE2F37B06200DBA659 /* room8UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = room8UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,13 +74,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E4292C892F37EBE50078D96B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		E4D5649D2F37B05F00DBA659 = {
 			isa = PBXGroup;
 			children = (
@@ -230,10 +222,6 @@
 				{
 					ProductGroup = E4D80FA42F37E80400055981 /* Products */;
 					ProjectRef = E4D80FA32F37E80400055981 /* room8.xcodeproj */;
-				},
-				{
-					ProductGroup = E4292C892F37EBE50078D96B /* Products */;
-					ProjectRef = E4292C882F37EBE50078D96B /* room8.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -428,6 +416,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = room8.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ML55X2KDSU;
@@ -466,6 +455,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = room8.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = ML55X2KDSU;

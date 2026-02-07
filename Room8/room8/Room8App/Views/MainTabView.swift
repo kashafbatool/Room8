@@ -26,10 +26,10 @@ struct MainTabView: View {
                     Label("Roommates", systemImage: "person.3.fill")
                 }
 
-            // Whiteboard Tab
-            WhiteboardView()
+            // Fridge Board Tab
+            FridgeBoardView()
                 .tabItem {
-                    Label("Whiteboard", systemImage: "note.text")
+                    Label("Fridge", systemImage: "square.grid.2x2")
                 }
         }
     }
