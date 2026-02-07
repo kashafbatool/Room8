@@ -25,6 +25,12 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Roommates", systemImage: "person.3.fill")
                 }
+
+            // Whiteboard Tab
+            WhiteboardView()
+                .tabItem {
+                    Label("Whiteboard", systemImage: "note.text")
+                }
         }
     }
 }
