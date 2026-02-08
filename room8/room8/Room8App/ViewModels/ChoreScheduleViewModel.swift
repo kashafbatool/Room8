@@ -20,22 +20,71 @@ class ChoreScheduleViewModel: ObservableObject {
     }
     
     // MARK: - Chore Management
-    
+
     func addChore(_ chore: Chore) {
         chores.append(chore)
         saveChoresToStorage()
+
+        // Sync to calendar and schedule notification
+        Task {
+            await syncChoreToCalendarAndNotifications(chore)
+        }
     }
-    
+
     func updateChore(_ chore: Chore) {
         if let index = chores.firstIndex(where: { $0.id == chore.id }) {
             chores[index] = chore
             saveChoresToStorage()
+
+            // Re-sync to calendar and update notifications
+            Task {
+                await syncChoreToCalendarAndNotifications(chore)
+            }
         }
     }
-    
+
     func deleteChore(_ choreId: UUID) {
+        // Find the chore before deleting to cancel notifications and calendar event
+        if let chore = chores.first(where: { $0.id == choreId }) {
+            Task {
+                // Cancel notifications
+                await NotificationManager.shared.cancelChoreNotification(for: choreId.uuidString)
+
+                // Delete from Google Calendar if event ID exists
+                if let eventID = chore.calendarEventID {
+                    try? await GoogleCalendarService.shared.deleteChoreEvent(eventID)
+                }
+            }
+        }
+
         chores.removeAll { $0.id == choreId }
         saveChoresToStorage()
+    }
+
+    // MARK: - Private Helpers
+
+    private func syncChoreToCalendarAndNotifications(_ chore: Chore) async {
+        // Schedule local notification
+        do {
+            try await NotificationManager.shared.scheduleChoreNotification(for: chore)
+        } catch {
+            print("⚠️ Failed to schedule notification: \(error)")
+        }
+
+        // Sync to Google Calendar if signed in
+        if GoogleAuthManager.shared.isSignedIn {
+            do {
+                if let eventID = try await GoogleCalendarService.shared.syncChore(chore) {
+                    // Update chore with calendar event ID
+                    if let index = chores.firstIndex(where: { $0.id == chore.id }) {
+                        chores[index].calendarEventID = eventID
+                        saveChoresToStorage()
+                    }
+                }
+            } catch {
+                print("⚠️ Failed to sync to Google Calendar: \(error)")
+            }
+        }
     }
 
     func toggleChoreCompletion(_ chore: Chore) {

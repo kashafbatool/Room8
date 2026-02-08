@@ -95,6 +95,17 @@ struct MoreView: View {
                             )
                         }
 
+                        NavigationLink {
+                            GoogleCalendarSettingsView()
+                        } label: {
+                            MoreItemRow(
+                                icon: "calendar.badge.clock",
+                                iconBg: Color.blue.opacity(0.15),
+                                title: "Google Calendar",
+                                subtitle: "Sync chores & get reminders"
+                            )
+                        }
+
                         Button {
                             auth.logout()
                         } label: {

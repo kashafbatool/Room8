@@ -13,6 +13,7 @@ struct Chore: Identifiable, Codable {
     var lastCompletedDate: Date?
     var scheduledDate: Date
     var isCompleted: Bool
+    var calendarEventID: String? // Google Calendar event ID for syncing
 
     init(
         id: UUID = UUID(),
@@ -25,7 +26,8 @@ struct Chore: Identifiable, Codable {
         createdDate: Date = Date(),
         lastCompletedDate: Date? = nil,
         scheduledDate: Date = Date(),
-        isCompleted: Bool = false
+        isCompleted: Bool = false,
+        calendarEventID: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -38,6 +40,7 @@ struct Chore: Identifiable, Codable {
         self.lastCompletedDate = lastCompletedDate
         self.scheduledDate = scheduledDate
         self.isCompleted = isCompleted
+        self.calendarEventID = calendarEventID
     }
 }
 
