@@ -9,6 +9,10 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var vm = HomeViewModel()
+    @Binding var selectedTab: AppTab
+    init(selectedTab: Binding<AppTab>) {
+        self._selectedTab = selectedTab
+    }
 
     var body: some View {
         ZStack {
@@ -126,7 +130,7 @@ struct HomeView: View {
                     title: "Chores",
                     subtitle: "\(vm.choresDue) due"
                 ) {
-                    // TODO: route to Calendar chores view
+                    selectedTab = .calendar
                 }
 
                 StatTile(
@@ -135,7 +139,7 @@ struct HomeView: View {
                     title: "Money",
                     subtitle: "Owe $\(vm.moneyOwed)"
                 ) {
-                    // TODO: route to Money expenses
+                    selectedTab = .money
                 }
             }
 
@@ -146,7 +150,7 @@ struct HomeView: View {
                     title: "To Buy",
                     subtitle: "\(vm.toBuyCount) items"
                 ) {
-                    // TODO: route to Money shopping
+                    selectedTab = .money
                 }
 
                 StatTile(
@@ -155,7 +159,7 @@ struct HomeView: View {
                     title: "Updates",
                     subtitle: "\(vm.updatesCount) new"
                 ) {
-                    // TODO: route to updates/notifications
+                    selectedTab = .more
                 }
             }
         }

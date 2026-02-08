@@ -8,15 +8,18 @@
 import SwiftUI
 
 struct MainTabView: View {
+
+    @State private var selectedTab: AppTab = .home
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             // HOME
             NavigationStack {
-                HomeView()
+                HomeView(selectedTab: $selectedTab)
             }
             .tabItem {
                 Label("Home", systemImage: "house")
             }
+            .tag(AppTab.home)
 
             // CALENDAR
             NavigationStack {
@@ -25,6 +28,7 @@ struct MainTabView: View {
             .tabItem {
                 Label("Calendar", systemImage: "calendar")
             }
+            .tag(AppTab.calendar)
 
             // MONEY
             NavigationStack {
@@ -33,6 +37,7 @@ struct MainTabView: View {
             .tabItem {
                 Label("Money", systemImage: "dollarsign")
             }
+            .tag(AppTab.money)
 
             // MORE
             NavigationStack {
@@ -41,6 +46,7 @@ struct MainTabView: View {
             .tabItem {
                 Label("More", systemImage: "ellipsis")
             }
+            .tag(AppTab.more)
         }
     }
 }
